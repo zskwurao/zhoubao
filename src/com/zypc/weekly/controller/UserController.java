@@ -31,20 +31,19 @@ import com.zypc.weekly.util.UserUtil;
  */
 @Controller
 public class UserController {
-
-	private String REDIRECT_IP = "118.126.117.138:8080";
-
 	@Autowired
 	private UserService userService;
+	
+	private String REDIRECT_IP = "http://zb.xupt.org";
 	private String url = "https://zypc.xupt.edu.cn/oauth/authorize";
 	private String response_type = "code";
 	private String client_id = "becef674aa44716a272a760c7a49a024a1ded5a7202a3bb1ad9f8519d1f4274a";
-	private String redirect_uri = "http://" + REDIRECT_IP + "/weekly/oauth.action";
-
-	@RequestMapping("/")
+	private String redirect_uri = REDIRECT_IP + "/oauth.action";
+	private String scope = "2f1e06f6f19b5c4dd6adab61a579b6cc0b5d7156a57618653ae649e2b7018fe7";
+	@RequestMapping("/goto.action")
 	public String goTO() {
-		String URL = "redirect:" + url + "?response_type=" + response_type + "&client_id=" + client_id + "&state=1"
-				+ "&redirect_uri=" + redirect_uri + "&scope=";
+		String URL = "redirect:" + url + "?response_type=" + response_type + "&client_id=" + client_id 
+				+ "&state=1" + "&redirect_uri=" + redirect_uri + "&scope=";
 		System.err.println(URL);
 		return URL;
 	}
@@ -114,11 +113,11 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/oauth.action")
-	public String oauth(String code,HttpServletResponse responses) {
+	public void oauth(String code,HttpServletResponse responses) {
 		// 参数
-		String redirect_uri = "http://" + REDIRECT_IP + "/weekly/oauth.action";
-		String client_id = "becef674aa44716a272a760c7a49a024a1ded5a7202a3bb1ad9f8519d1f4274a";
-		String scope = "2f1e06f6f19b5c4dd6adab61a579b6cc0b5d7156a57618653ae649e2b7018fe7";
+		
+		
+		
 		// 获取token接口
 		String url = "https://zypc.xupt.edu.cn/oauth/token";
 		String grant_type = "authorization_code";
@@ -132,15 +131,18 @@ public class UserController {
 		CloseableHttpResponse response = null;
 		// 获取token为post请求
 		HttpPost httpPost = new HttpPost(toUrl);
-		String user_id;
+		String user_id="";
 		try {
 			// 获取返回结果
 			response = client.execute(httpPost);
 			// 拿到回调的json串
 			String result = EntityUtils.toString(response.getEntity());// 可以很好的处理中文，保证中文没有乱码
+			System.out.println(result);
 			// 将字符串转换成java对象并拿到token
 			Token jsonToPojo = JsonUtils.jsonToPojo(result, Token.class);
+			if(jsonToPojo.getGroup().equals("member")){
 			String access_token = jsonToPojo.getAccess_token();
+			String name = jsonToPojo.getUsername();
 			// 拼接获取用户信息的完整url
 			String URL_use = URL_user + "?" + "access_token=" + access_token;
 			// 获取用户信息为get请求
@@ -149,10 +151,11 @@ public class UserController {
 			response = client.execute(httpGet);
 			// 取出实体
 			String resultGet = EntityUtils.toString(response.getEntity());
-
+			
 			// 转json为对象
 			UserUtil userUtil = JsonUtils.jsonToPojo(resultGet, UserUtil.class);
 			user_id = userUtil.getStudent_no();
+			
 			// 判断该用户是否第一次登录
 			int count = userService.selectCount(userUtil.getStudent_no());
 			// count为0代表用户未登录过，需要向用户表插入新数据
@@ -168,18 +171,26 @@ public class UserController {
 				user.setCategory("开发");
 				user.setPower((short) -1);
 				userService.addUser(user);
+				
 			}
+			
+			Cookie cookie = new Cookie("user_id", user_id);
+		    responses.addCookie(cookie);
+		    responses.sendRedirect("index.html");
+			}else{
+				responses.sendRedirect("wrong.html");
+			}
+			
 		}
 
 		catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			// return "redirect:http://www.baidu.com";
-			return null;
+			//return null;
 		}
-		Cookie cookie = new Cookie("user_id", user_id);
-	    responses.addCookie(cookie);
-		return "redirect:index.html";
+		
+		//return "redirect:index.html";
 	}
 
 	/**

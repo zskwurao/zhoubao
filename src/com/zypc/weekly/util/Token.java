@@ -9,6 +9,9 @@ public class Token implements Serializable {
 	private String access_token;
 	private String token_type;
 	private String created_at;
+	private String username;
+	private String group;
+	private String dispname;
 	public String getAccess_token() {
 		return access_token;
 	}
@@ -26,6 +29,27 @@ public class Token implements Serializable {
 	}
 	public void setCreated_at(String created_at) {
 		this.created_at = created_at;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getGroup() {
+		return group;
+	}
+	public void setGroup(String group) {
+		this.group = group;
+	}
+	public String getDispname() {
+		return dispname;
+	}
+	public void setDispname(String dispname) {
+		this.dispname = dispname;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 	
 }

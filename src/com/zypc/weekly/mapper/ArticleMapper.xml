@@ -20,7 +20,7 @@
   </resultMap>
   
   <select id="getIsSubmit" parameterType="User" resultType="Integer">
-  	select count(*) from article where u_id = #{id} and create_date > #{time}
+  	select count(*) from article where u_id = #{id} and create_date > #{time} and status = 1
   </select>
   
   <insert id="addArticle" parameterType="Article">

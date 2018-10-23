@@ -25,7 +25,17 @@
 			</bean>
 		</mvc:message-converters>
 	</mvc:annotation-driven>
-
+	
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<mvc:mapping path="/index.html"/>
+			<mvc:exclude-mapping path="/user/login.action"/>
+			<mvc:exclude-mapping path="/goto.action"/>
+			<mvc:exclude-mapping path="/oauth.action"/>
+			<bean class="com.zypc.weekly.util.MyInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
 
 	<!-- 注解驱动 -->
 	<mvc:annotation-driven></mvc:annotation-driven>
